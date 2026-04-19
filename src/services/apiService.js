@@ -46,7 +46,7 @@ class ApiService {
     if (filters.sortOrder) params.append('sort_order', filters.sortOrder)
     
     const queryString = params.toString()
-    const response = await axiosClient.get(`/movies?${queryString}`)
+    const response = await axiosClient.get(`/movies/?${queryString}`)
     return response.data
   }
 
