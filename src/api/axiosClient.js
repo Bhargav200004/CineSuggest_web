@@ -1,7 +1,12 @@
 import axios from 'axios'
 
 // Force HTTPS to prevent mixed content errors
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://cinesuggest-production.up.railway.app').replace('http://', 'https://')
+// Temporary fix: Hardcode HTTPS URL to ensure no mixed content issues
+const API_BASE_URL = 'https://cinesuggest-production.up.railway.app'
+
+// Debug logging
+console.log('Forced HTTPS API Base URL:', API_BASE_URL)
+console.log('Environment API URL (ignored):', import.meta.env.VITE_API_URL)
 
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
