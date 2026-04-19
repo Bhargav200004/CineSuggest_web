@@ -26,6 +26,7 @@ CineSuggest isn't just another movie database. It's a smart, intuitive platform 
 ### Prerequisites
 - Node.js (version 16 or higher)
 - npm or yarn
+- Backend API running (see Deployment section)
 
 ### Installation
 
@@ -40,13 +41,52 @@ CineSuggest isn't just another movie database. It's a smart, intuitive platform 
    npm install
    ```
 
-3. **Start the development server**
+3. **Configure API URL** (if needed)
+   Create a `.env.local` file:
+   ```
+   VITE_API_URL=http://localhost:8000  # Your local backend
+   ```
+
+4. **Start the development server**
    ```bash
    npm run dev
    ```
 
-4. **Open your browser**
+5. **Open your browser**
    Navigate to `http://localhost:5173` and start exploring!
+
+## 🌍 Deployment
+
+### Production Deployment
+
+1. **Create production environment file**
+   ```
+   # .env.production
+   VITE_API_URL=https://your-backend-url.com
+   ```
+
+2. **Build for production**
+   ```bash
+   npm run build
+   ```
+
+3. **Deploy to your preferred platform**
+   - Vercel: `vercel --prod`
+   - Netlify: Deploy the `dist` folder
+   - Railway: Connect your GitHub repository
+
+### CORS Configuration
+
+If you're getting CORS errors when connecting to your backend, check the `CORS_SETUP.md` file for detailed instructions on configuring CORS in your backend.
+
+**Quick CORS fix for Express.js:**
+```javascript
+const cors = require('cors')
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://your-frontend-domain.com'],
+  credentials: true
+}))
+```
 
 ## 🎮 How to Use
 
@@ -119,7 +159,24 @@ We're always working on making CineSuggest better. Here's what we're planning:
 - 🎭 **TV show support** because we love binge-watching too
 - 📊 **Advanced analytics** to understand your viewing patterns
 
-## 🐛 Found a Bug?
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**"Failed to load movies" error:**
+- Check if your backend is running and accessible
+- Verify CORS configuration (see CORS_SETUP.md)
+- Ensure API URL is correct in your environment variables
+
+**CORS errors in browser console:**
+- Your backend needs to allow requests from your frontend domain
+- See `CORS_SETUP.md` for detailed CORS configuration
+
+**Authentication issues:**
+- Clear browser localStorage and try logging in again
+- Check if your backend auth endpoints are working
+
+### Found a Bug?
 
 Have an idea or spotted something that's not working? We'd love to hear from you!
 
