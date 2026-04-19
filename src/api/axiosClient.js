@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://cinesuggest-production.up.railway.app'
+// Force HTTPS to prevent mixed content errors
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://cinesuggest-production.up.railway.app').replace('http://', 'https://')
 
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
