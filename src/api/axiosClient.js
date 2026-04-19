@@ -41,7 +41,21 @@ axiosClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    // Force HTTPS on the full URL
+    if (config.baseURL && config.baseURL.startsWith('http://')) {
+      config.baseURL = config.baseURL.replace('http://', 'https://')
+      console.warn('Forced HTTPS in baseURL:', config.baseURL)
+    }
+    
+    // Also force HTTPS on the full URL if it's absolute
+    if (config.url && config.url.startsWith('http://')) {
+      config.url = config.url.replace('http://', 'https://')
+      console.warn('Forced HTTPS in URL:', config.url)
+    }
+    
     console.log('Request:', config.method?.toUpperCase(), config.url)
+    console.log('BaseURL:', config.baseURL)
     return config
   },
   (error) => {
@@ -49,7 +63,7 @@ axiosClient.interceptors.request.use(
   }
 )
 
-// Response interceptor to debug redirects
+// Response interceptor to debug redirects and enforce HTTPS
 axiosClient.interceptors.response.use(
   (response) => {
     console.log('Response:', response.status, response.config.url)
@@ -60,6 +74,25 @@ axiosClient.interceptors.response.use(
   },
   (error) => {
     console.error('Request failed:', error.config?.url, 'Status:', error.response?.status)
+    
+    // Handle mixed content errors by retrying with HTTPS
+    if (error.code === 'ERR_NETWORK' || error.message?.includes('Mixed Content')) {
+      console.warn('Mixed content error detected, attempting to fix...')
+      
+      // Retry the request with forced HTTPS
+      const originalRequest = error.config
+      if (originalRequest && !originalRequest._retry) {
+        originalRequest._retry = true
+        
+        // Ensure the baseURL is HTTPS
+        if (originalRequest.baseURL && originalRequest.baseURL.startsWith('http://')) {
+          originalRequest.baseURL = originalRequest.baseURL.replace('http://', 'https://')
+          console.log('Retrying with HTTPS baseURL:', originalRequest.baseURL)
+          return axiosClient(originalRequest)
+        }
+      }
+    }
+    
     if (error.response?.status >= 300 && error.response?.status < 400) {
       console.warn('Redirect error:', error.response.status, 'Location:', error.response.headers.location)
     }
