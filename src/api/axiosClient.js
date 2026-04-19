@@ -13,6 +13,12 @@ const axiosClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Follow redirects automatically
+  maxRedirects: 5,
+  validateStatus: function (status) {
+    // Accept 2xx and 3xx status codes
+    return status >= 200 && status < 400
+  }
 })
 
 // Keep reference to base axios for refresh token calls (avoid interceptors)
@@ -21,6 +27,12 @@ const baseAxios = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Follow redirects automatically
+  maxRedirects: 5,
+  validateStatus: function (status) {
+    // Accept 2xx and 3xx status codes
+    return status >= 200 && status < 400
+  }
 })
 
 axiosClient.interceptors.request.use(
@@ -29,9 +41,28 @@ axiosClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    console.log('Request:', config.method?.toUpperCase(), config.url)
     return config
   },
   (error) => {
+    return Promise.reject(error)
+  }
+)
+
+// Response interceptor to debug redirects
+axiosClient.interceptors.response.use(
+  (response) => {
+    console.log('Response:', response.status, response.config.url)
+    if (response.status >= 300 && response.status < 400) {
+      console.warn('Redirect detected:', response.status, 'Location:', response.headers.location)
+    }
+    return response
+  },
+  (error) => {
+    console.error('Request failed:', error.config?.url, 'Status:', error.response?.status)
+    if (error.response?.status >= 300 && error.response?.status < 400) {
+      console.warn('Redirect error:', error.response.status, 'Location:', error.response.headers.location)
+    }
     return Promise.reject(error)
   }
 )
